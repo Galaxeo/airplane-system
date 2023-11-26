@@ -9,6 +9,12 @@
 {% if not message %}
 	<a href="/login">Login</a>
 	<a href="/register">Register</a>
+	<form action="/showFlights" method="POST">
+		<input type="submit" value = Flights/>
+		{% if data%}
+			<p class="error"><strong>Data:</strong> {{data}}</p>
+		{% endif %}
+	</form>
 {% endif %}
 
 {% if message %}
