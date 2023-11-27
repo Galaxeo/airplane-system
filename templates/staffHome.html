@@ -3,11 +3,24 @@
 <head>
 </head>
 
-<body>
-    <form action="/post" method="POST">
-        <h1>Welcome {{username}}</h1>
-    </form>
+<!-- Use cases:
+    1. View flights (almost done, need to add more info)
+    2. Create new flights (almost done, add labels, maybe make it so status is multiple choice)
+    3. Change status of flights (done)
+    4. Add airplane in the system (almost done, consider adding auto age)
+    5. Add new airport (done)
+    6. View flight ratings (done, make sure to check for more populated ratings)
+    7. Schedule maintenance
+    8. View frequent customers
+    9. View earned revenue
+    10. Logout (done)
+-->
 
+<body>
+    {% if message %}
+    <p class="error"><strong>Message:</strong> {{message}}</p>
+    {% endif %}
+    <h1>Welcome {{username}}</h1>
     <style type="text/css">
         table,
         th,
@@ -16,20 +29,103 @@
         }
     </style>
 
+    {% if data%}
     <table>
-        <th>Time</th>
-        <th>Post</th>
+        <th>Airline Name</th>
+        <th>Flight Number</th>
+        <th>Status</th>
+        <th>Change Status</th>
+        {% for line in data %}
+        <tr>
+            <td>{{line['AirlineName']}}</td>
+            <td>{{line['FlightNum']}}</td>
+            <td>{{line['Status']}}</td>
+            <td>
+                <form action="/staffChangeStatus" method="POST">
+                    <input type="hidden" name="flightNum" value="{{line['FlightNum']}}" />
+                    <select name="status">
+                        <option value="On Time">On Time</option>
+                        <option value="Delayed">Delayed</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                    <input type="submit" value="Change Status" />
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
 
-        <!-- {% for line in posts %}
+    <!-- {% for line in posts %}
 	<tr>
 		<td>{{line['ts']}}</td>
 		<td>{{line['blog_post']}}</td>
 	</tr>
 {% endfor %} -->
+
+    <form action="/staffShowFlights" method="POST">
+        <input type="submit" value='See Flights' />
+    </form>
+    {% if ratings %}
+    <table>
+        <th>Flight Number</th>
+        <th>Email</th>
+        <th>Rating</th>
+        <th>Comment</th>
+        {% for line in ratings %}
+        <tr>
+            <td>{{line['FlightNum']}}</td>
+            <td>{{line['Email']}}</td>
+            <td>{{line['Rating']}}</td>
+            <td>{{line['Comment']}}</td>
+        </tr>
+        {% endfor %}
     </table>
-
-    <a href="/logout">Logout</a>
-
+    {% endif %}
+    <form action="/staffShowRatings" method="POST">
+        <input type="submit" value='See Ratings' />
+    </form>
+    <h1>Add Flight</h1>
+    <form action="/staffAddFlight" method="POST">
+        <input type="text" name="flightNum" placeholder="Flight Number" required /> </br>
+        <label for="departureTime">Departure Time:</label>
+        <input type="datetime-local" name="departureTime" placeholder="Departure Time" required /> </br>
+        <input type="text" name="departureAirport" placeholder="Departure Airport" required /> </br>
+        <label for="arrivalTime">Arrival Time:</label>
+        <input type="datetime-local" name="arrivalTime" placeholder="Arrival Time" required /> </br>
+        <input type="text" name="arrivalAirport" placeholder="Arrival Airport" required /> </br>
+        <input type="text" name="basePrice" placeholder="Base Price" required /> </br>
+        <input type="text" name="status" placeholder="Status" required /> </br>
+        <input type="text" name="planeID" placeholder="Plane ID" required /> </br>
+        <input type="submit" value='Add Flight' />
+    </form>
+    <h1>Add Airplane</h1>
+    <form action="/staffAddAirplane" method="POST">
+        <input type="text" name="planeID" placeholder="Plane ID" required /> </br>
+        <input type="text" name="numSeats" placeholder="Number of Seats" required /> </br>
+        <input type="text" name="manufacturer" placeholder="Manufacturer" required /> </br>
+        <input type="text" name="modelNum" placeholder="Model Number" required /> </br>
+        <input type="date" name="manufactureDate" placeholder="Manufacture Date" required /> </br>
+        <input type="text" name="age" placeholder="Age" required /> </br>
+        <input type="submit" value='Add Airplane' />
+        <a href="/logout">Logout</a>
+    </form>
+    <h1>Add Airport</h1>
+    <form action="/staffAddAirport" method="POST">
+        <input type="text" name="airportCode" placeholder="Airport Code" required /> </br>
+        <input type="text" name="airportName" placeholder="Airport Name" required /> </br>
+        <input type="text" name="airportCity" placeholder="Airport City" required /> </br>
+        <input type="text" name="airportState" placeholder="Airport State" required /> </br>
+        <input type="text" name="numTerminals" placeholder="Number of Terminals" required /> </br>
+        Airport Type:
+        <select name="type">
+            <option value="International">International</option>
+            <option value="Domestic">Domestic</option>
+            <option value="Both">Both</option>
+        </select>
+        <input type="submit" value='Add Airport' />
+        <a href="/logout">Logout</a>
+    </form>
 </body>
 
 

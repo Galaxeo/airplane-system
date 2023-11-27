@@ -5,6 +5,16 @@
 
 <!-- # In order to add flights to the userHome, have to run an sql query that finds all flights that the user has a ticket to (sql select [idk select all info from flight] from flight as f, ticket as t, purhcase as p, customer as c, where c.email = p.email and p.ticketID = t.TicketId, t.flightNum = f.flightnum -->
 
+<!-- Use cases:
+    1. View my flights
+    2. Search for flights
+    3. Purchase ticket
+    4. Cancel trip
+    5. Give ratings
+    6. Track spending
+    7. Logout (done)
+-->
+
 <body>
     <form action="/post" method="POST">
         <h1>Welcome {{firstName}}</h1>

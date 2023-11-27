@@ -153,21 +153,104 @@ def staffLoginAuth():
 	error = None
 	if(data):
 		session['username'] = username
-		# session['airlineName'] = data['airline_name']
+		session['airlineName'] = data['AirlineName']
 		return redirect(url_for('staffHome'))
 	else:
 		error = "Invalid login or username"
 		return render_template('staffLogin.html', error=error)
+
 @app.route('/staffHome')
 def staffHome():
 	username = session['username']
-	# airlineName = session['airlineName']
-	# cursor = conn.cursor();
-	# query = 'SELECT * FROM flight WHERE airline_name = %s'
-	# cursor.execute(query, (airlineName))
-	# data = cursor.fetchall()
-	# cursor.close()
 	return render_template('staffHome.html', username=username)
+@app.route('/staffShowFlights', methods=['GET', 'POST'])
+# Show flights
+def staffShowFlights():
+	username = session['username']
+	airlineName = session['airlineName']
+	cursor = conn.cursor();
+	query = 'SELECT * FROM flight WHERE AirlineName = %s'
+	cursor.execute(query, (airlineName))
+	data = cursor.fetchall()
+	cursor.close()
+	return render_template('staffHome.html', username=username, data=data)
+@app.route('/staffAddFlight', methods=['GET', 'POST'])
+# Add flight
+def staffAddFlight():
+	username = session['username']
+	airlineName = session['airlineName']
+	flightNum = request.form['flightNum']
+	departureTime = request.form['departureTime']
+	departureAirport = request.form['departureAirport']
+	arrivalTime = request.form['arrivalTime']
+	arrivalAirport = request.form['arrivalAirport']
+	basePrice = request.form['basePrice']
+	status = request.form['status']
+	planeID = request.form['planeID']
+	cursor = conn.cursor()
+	ins = 'INSERT INTO flight VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)'
+	cursor.execute(ins, (airlineName, flightNum, departureTime, departureAirport, arrivalTime, arrivalAirport, basePrice, status, planeID))
+	conn.commit()
+	cursor.close()
+	return render_template('staffHome.html', username=username, message="Flight added successfully")
+# Change status of flight
+@app.route('/staffChangeStatus', methods=['GET', 'POST'])
+def staffChangeStatus():
+	username = session['username']
+	airlineName = session['airlineName']
+	flightNum = request.form['flightNum']
+	status = request.form['status']
+	cursor = conn.cursor()
+	query = 'UPDATE flight SET status = %s WHERE AirlineName = %s AND flightNum = %s'
+	cursor.execute(query, (status, airlineName, flightNum))
+	conn.commit()
+	cursor.close()
+	return render_template('staffHome.html', username=username, message="Flight status changed successfully")
+# Add airplane
+@app.route('/staffAddAirplane', methods=['GET', 'POST'])
+def staffAddAirplane():
+	username = session['username']
+	airlineName = session['airlineName']
+	planeID = request.form['planeID']
+	numSeats = request.form['numSeats']
+	manufacturer = request.form['manufacturer']
+	modelNum = request.form['modelNum']
+	manufactureDate = request.form['manufactureDate']
+	age = request.form['age']
+	cursor = conn.cursor()
+	ins = 'INSERT INTO airplane VALUES(%s, %s, %s, %s, %s, %s, %s)'
+	cursor.execute(ins, (planeID, airlineName, numSeats, manufacturer, modelNum, manufactureDate, age))
+	conn.commit()
+	cursor.close()
+	return render_template('staffHome.html', username=username, message="Airplane added successfully")
+# Add airport
+@app.route('/staffAddAirport', methods=['GET', 'POST'])
+def staffAddAirport():
+	username = session['username']
+	airlineName = session['airlineName']
+	airportCode = request.form['airportCode']
+	airportName = request.form['airportName']
+	airportCity = request.form['airportCity']
+	airportState = request.form['airportState']
+	numTerminals = request.form['numTerminals']
+	type = request.form['type']
+	cursor = conn.cursor()
+	ins = 'INSERT INTO airport VALUES(%s, %s, %s, %s, %s, %s)'
+	cursor.execute(ins, (airportCode, airportName, airportCity, airportState, numTerminals, type))
+	conn.commit()
+	cursor.close()
+	return render_template('staffHome.html', username=username, message="Airport added successfully")
+# Show all ratings
+@app.route('/staffShowRatings', methods=['GET', 'POST'])
+def staffShowRatings():
+	username = session['username']
+	airlineName = session['airlineName']
+	cursor = conn.cursor();
+	query = 'SELECT * FROM rating as r, flight as f WHERE r.FlightNum = f.flightNum AND AirlineName = %s'
+	cursor.execute(query, (airlineName))
+	data = cursor.fetchall()
+	cursor.close()
+	return render_template('staffHome.html', username=username, ratings=data)
 
 #Authenticates the login
 @app.route('/loginAuth', methods=['GET', 'POST'])
