@@ -1,17 +1,15 @@
 <html>
+
 <head>
 </head>
+
 <body>
-<a href="/userRegister">Register as User</a>
-<a href="/staffRegister">Register as Staff</a>
-<form action="/registerAuth" method="POST">
-	<input type="text" name = "username" placeholder="username" required/> </br>
-	<input type="password" name = "password" placeholder="password" required/></br>
-	<input type="submit" value = Register />
+	<a href="/userRegister">Register as User</a>
+	<a href="/staffRegister">Register as Staff</a>
 	{% if error %}
-		<p class="error"><strong>Error:</strong> {{error}}</p>
+	<p class="error"><strong>Error:</strong> {{error}}</p>
 	{% endif %}
-</form>
-<a href="/">Go back</a>
+	<a href="/">Go back</a>
 </body>
+
 </html>

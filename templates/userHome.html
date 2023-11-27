@@ -1,0 +1,38 @@
+<html>
+
+<head>
+</head>
+
+<!-- # In order to add flights to the userHome, have to run an sql query that finds all flights that the user has a ticket to (sql select [idk select all info from flight] from flight as f, ticket as t, purhcase as p, customer as c, where c.email = p.email and p.ticketID = t.TicketId, t.flightNum = f.flightnum -->
+
+<body>
+    <form action="/post" method="POST">
+        <h1>Welcome {{firstName}}</h1>
+    </form>
+
+    <style type="text/css">
+        table,
+        th,
+        td {
+            border: 1px solid black;
+        }
+    </style>
+
+    <table>
+        <th>Flights</th>
+        <th>Pick here</th>
+
+        <!-- {% for line in posts %}
+	<tr>
+		<td>{{line['ts']}}</td>
+		<td>{{line['blog_post']}}</td>
+	</tr>
+{% endfor %} -->
+    </table>
+
+    <a href="/userLogout">Logout</a>
+
+</body>
+
+
+</html>

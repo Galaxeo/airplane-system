@@ -6,18 +6,18 @@
 </head>
 
 <body>
-{% if not message %}
+	{% if not message %}
 	<a href="/login">Login</a>
 	<a href="/register">Register</a>
 	<form action="/showFlights" method="POST">
-		<input type="submit" value = Flights/>
+		<input type="submit" value='See Flights' />
 		{% if data%}
-			<p class="error"><strong>Data:</strong> {{data}}</p>
+		<p class="error"><strong>Data:</strong> {{data}}</p>
 		{% endif %}
 	</form>
-{% endif %}
+	{% endif %}
 
-{% if message %}
+	{% if message %}
 	<a href="/logout">Logout</a>
 	<a href="/remove_account">Remove Account</a>
 	<p class="message">You are logged in {{message}}. You have {{num}} follower(s)</p> </br>
@@ -27,11 +27,11 @@
 	<a href="/view_followed">View people you have followed</a> </br>
 	</br>
 
-        <h4>15 most recent tweets from you and your followers </h4> </br>
+	<h4>15 most recent tweets from you and your followers </h4> </br>
 
 	{% for line in tweets%}
-	        <p>{{line}}</p>
-	        <hr>
+	<p>{{line}}</p>
+	<hr>
 	{% endfor %}
 	{% endif %}
 </body>

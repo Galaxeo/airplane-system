@@ -37,10 +37,9 @@ def userRegister():
 def staffRegister():
 	return render_template('staffRegister.html')
 
-#Authenticate login for users
+#Authenticate register for users
 @app.route('/userRegisterAuth', methods=['GET', 'POST'])
 def userRegisterAuth():
-	#TODO: if aptNum is missing, insert NULL
 	#grabs information from the forms
 	email = request.form['email']
 	password = request.form['password']
@@ -49,6 +48,8 @@ def userRegisterAuth():
 	buildingNum= request.form['buildingNum']
 	street = request.form['street']
 	aptNum = request.form['aptNum']
+	if aptNum == '':
+		aptNum = None
 	city = request.form['city']
 	state= request.form['state']
 	zipcode = request.form['zipcode']
@@ -70,13 +71,47 @@ def userRegisterAuth():
 		error = "This user already exists"
 		return render_template('userRegister.html', error = error)
 	else:
-		ins = 'INSERT INTO customer VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s,%s,%s, %s)'
-		cursor.execute(ins, (email, password, firstName, lastName, buildingNum, street, aptNum, city, state, zipcode, passportNumber, passportExpiration, passportCountry, dateOfBirth))
-		conn.commit()
-		cursor.close()
+		try:
+			ins = 'INSERT INTO customer VALUES(%s, md5(%s), %s, %s, %s, %s, %s, %s, %s, %s,%s,%s,%s, %s)'
+			cursor.execute(ins, (email, password, firstName, lastName, buildingNum, street, aptNum, city, state, zipcode, passportNumber, passportExpiration, passportCountry, dateOfBirth))
+			conn.commit()
+			cursor.close()
+		except:
+			error = "Please make sure that the fields are correct"
+			return render_template('userRegister.html', error = error)
 		return render_template('index.html')
-
-#Authenticate login for staff
+# Authenticates login for users
+@app.route('/userLoginAuth', methods=['GET', 'POST'])
+def userLoginAuth():
+	email = request.form['email']
+	password = request.form['password']
+	cursor = conn.cursor()
+	query = 'SELECT * FROM customer WHERE email = %s and password = md5(%s)'
+	cursor.execute(query, (email, password))
+	data = cursor.fetchone()
+	error = None
+	if(data):
+		session['email'] = email
+		print(data)
+		session['firstName'] = data['FirstName']
+		return redirect(url_for('userHome'))
+	else:
+		error = "Invalid login or username"
+		return render_template('userLogin.html', error=error)
+@app.route('/userLogin')
+def userLogin():
+	return render_template('userLogin.html')
+@app.route('/userHome')
+def userHome():
+	email = session['email']
+	firstName = session['firstName']
+	# cursor = conn.cursor();
+	# query = 'SELECT * FROM flight WHERE status = "upcoming"'
+	# cursor.execute(query)
+	# data = cursor.fetchall()
+	# cursor.close()
+	return render_template('userHome.html', firstName=firstName)
+#Authenticate register for staff
 @app.route('/staffRegisterAuth', methods=['GET', 'POST'])
 def staffRegisterAuth():
 	username = request.form['username']
@@ -94,11 +129,45 @@ def staffRegisterAuth():
 		error = "This user already exists"
 		return render_template('staffRegister.html', error = error)
 	else:
-		ins = 'INSERT INTO airlinestaff VALUES(%s, %s, %s, %s, %s, %s)'
-		cursor.execute(ins, (username, password, airlineName, firstName, lastName, dateOfBirth))
-		conn.commit()
-		cursor.close()
+		try:
+			ins = 'INSERT INTO airlinestaff VALUES(%s, MD5(%s), %s, %s, %s, %s)'
+			cursor.execute(ins, (username, password, airlineName, firstName, lastName, dateOfBirth))
+			conn.commit()
+			cursor.close()
+		except:
+			error = "Please make sure that the fields are correct"
+			return render_template('staffRegister.html', error = error)
 		return render_template('index.html')
+@app.route('/staffLogin')
+def staffLogin():
+	return render_template('staffLogin.html')
+# Authenticates login for staff
+@app.route('/staffLoginAuth', methods=['GET', 'POST'])
+def staffLoginAuth():
+	username = request.form['username']
+	password = request.form['password']
+	cursor = conn.cursor()
+	query = 'SELECT * FROM airlinestaff WHERE username = %s and password = md5(%s)'
+	cursor.execute(query, (username, password))
+	data = cursor.fetchone()
+	error = None
+	if(data):
+		session['username'] = username
+		# session['airlineName'] = data['airline_name']
+		return redirect(url_for('staffHome'))
+	else:
+		error = "Invalid login or username"
+		return render_template('staffLogin.html', error=error)
+@app.route('/staffHome')
+def staffHome():
+	username = session['username']
+	# airlineName = session['airlineName']
+	# cursor = conn.cursor();
+	# query = 'SELECT * FROM flight WHERE airline_name = %s'
+	# cursor.execute(query, (airlineName))
+	# data = cursor.fetchall()
+	# cursor.close()
+	return render_template('staffHome.html', username=username)
 
 #Authenticates the login
 @app.route('/loginAuth', methods=['GET', 'POST'])
@@ -168,13 +237,13 @@ def home():
     
     username = session['username']
     cursor = conn.cursor();
-    query = 'SELECT ts, blog_post FROM blog WHERE username = %s ORDER BY ts DESC'
-    cursor.execute(query, (username))
-    data1 = cursor.fetchall() 
-    for each in data1:
-        print(each['blog_post'])
-    cursor.close()
-    return render_template('home.html', username=username, posts=data1)
+    # query = 'SELECT ts, blog_post FROM blog WHERE username = %s ORDER BY ts DESC'
+    # cursor.execute(query, (username))
+    # data1 = cursor.fetchall() 
+    # for each in data1:
+    #     print(each['blog_post'])
+    # cursor.close()
+    return render_template('home.html', username=username)
 
 		
 @app.route('/post', methods=['GET', 'POST'])
@@ -193,6 +262,11 @@ def logout():
 	session.pop('username')
 	return redirect('/')
 		
+@app.route('/userLogout')
+def userLogout():
+	session.pop('email')
+	session.pop('firstName')
+	return redirect('/')
 app.secret_key = 'some key that you will never guess'
 #Run the app on localhost port 5000
 #debug = True -> you don't have to restart flask
