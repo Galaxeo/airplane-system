@@ -1,7 +1,7 @@
 #Import Flask Library
 from flask import Flask, render_template, request, session, url_for, redirect
 import pymysql.cursors
-import hashlib
+from datetime import datetime
 
 #Initialize the app from Flask
 app = Flask(__name__)
@@ -37,6 +37,7 @@ def userRegister():
 def staffRegister():
 	return render_template('staffRegister.html')
 
+# ------ All user oriented routes ------ #
 #Authenticate register for users
 @app.route('/userRegisterAuth', methods=['GET', 'POST'])
 def userRegisterAuth():
@@ -111,7 +112,38 @@ def userHome():
 	# data = cursor.fetchall()
 	# cursor.close()
 	return render_template('userHome.html', firstName=firstName)
-#Authenticate register for staff
+# View user flights
+@app.route('/userViewFlights', methods=['GET', 'POST'])
+def userViewFlights():
+	firstName = session['firstName']
+	email = session['email']
+	cursor = conn.cursor();
+	# query where we select all flights that the user has purchased
+	query = 'SELECT f.FlightNum, f.AirlineName, p.TicketID FROM flight as f, ticket as t, purchase as p WHERE p.email = %s AND p.TicketID = t.TicketID AND t.FlightNum = f.FlightNum'
+	# query all flights
+	# query = 'SELECT * FROM flight'
+	cursor.execute(query, (email))
+	data = cursor.fetchall()
+	cursor.close()
+	return render_template('userHome.html', firstName=firstName, flights=data)
+# Search for flights with any of the given parameters
+@app.route('/userSearchFlights', methods=['GET', 'POST'])
+def userSearchFlights():
+	firstName = session['firstName']
+	departureAirport = request.form['departureAirport']
+	arrivalAirport = request.form['arrivalAirport']
+	departureTime = request.form['departureTime']
+	arrivalTime = request.form['arrivalTime']
+	cursor = conn.cursor();
+	query = 'SELECT * FROM flight WHERE departureAirport = %s OR arrivalAirport = %s OR departureTime = %s OR arrivalTime = %s'
+	cursor.execute(query, (departureAirport, arrivalAirport, departureTime, arrivalTime))
+	data = cursor.fetchall()
+	cursor.close()
+	return render_template('userHome.html', firstName=firstName, searched=data)
+
+
+# ------ All staff oriented routes ------ #
+# Authenticate register for staff
 @app.route('/staffRegisterAuth', methods=['GET', 'POST'])
 def staffRegisterAuth():
 	username = request.form['username']
@@ -286,6 +318,20 @@ def staffShowFrequentCustomer():
 	data = cursor.fetchall()
 	cursor.close()
 	return render_template('staffHome.html', username=username, customer=data)
+# Show earned revenue, this is done by calculating sum of calculated price of tickets where ticket.ticketid = purchase.ticketid and ticket.flightnum = flight.flightnum and flight.airlinename = airlineName
+@app.route('/staffShowRevenue', methods=['GET', 'POST'])
+def staffShowRevenue():
+	username = session['username']
+	airlineName = session['airlineName']
+	try:
+		cursor = conn.cursor();
+		query = 'SELECT SUM(calculatedPrice) FROM ticket as t, purchase as p, flight as f WHERE t.ticketID = p.TicketID AND t.FlightNum = f.FlightNum AND f.AirlineName = %s'
+		cursor.execute(query, (airlineName))
+		data = cursor.fetchall()
+		cursor.close()
+		return render_template('staffHome.html', username=username, revenue=data)
+	except: 
+		return render_template('staffHome.html', username=username, message="No revenue to show/Other error?")
 
 #Authenticates the login
 @app.route('/loginAuth', methods=['GET', 'POST'])

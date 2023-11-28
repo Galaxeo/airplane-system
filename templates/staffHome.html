@@ -5,16 +5,17 @@
 
 <!-- Use cases:
     1. View flights (almost done, have to make sure that it default shows next 30 days, and they can choose a range of dates)
-    2. Create new flights (almost done, add labels, maybe make it so status is multiple choice)
+    2. Create new flights (almost done)
     3. Change status of flights (done)
     4. Add airplane in the system (almost done, consider adding auto age)
     5. Add new airport (done)
     6. View flight ratings (done, make sure to check for more populated ratings)
     7. Schedule maintenance (done)
-    8. View frequent customer (done, maybe display more info)
-    9. View earned revenue (not done, have to include last month as well as last yera)
+    8. View frequent customer (almost, add list of flights that customer has taken)
+    9. View earned revenue (almost done, have to include last month as well as last year)
     10. Logout (done)
     Additionally: enforce that only staff can do these actions
+    Mostly have to add checks for dates
 -->
 
 <body>
@@ -81,7 +82,6 @@
     <form action="/staffShowRatings" method="POST">
         <input type="submit" value='See Ratings' />
     </form>
-    View most frequent customer
     {% if customer %}
     {% for line in customer %}
     <p>{{line['Email']}}</p>
@@ -89,6 +89,14 @@
     {% endif %}
     <form action="/staffShowFrequent" method="POST">
         <input type="submit" value='See Most Frequent Customer' />
+    </form>
+    {% if revenue %}
+    {% for line in revenue %}
+    <p>{{line['SUM(calculatedPrice)']}}</p>
+    {% endfor %}
+    {% endif %}
+    <form action="/staffShowRevenue" method="POST">
+        <input type="submit" value='View Earned Revenue' />
     </form>
     <h1>Add Flight</h1>
     <form action="/staffAddFlight" method="POST">

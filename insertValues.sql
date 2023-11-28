@@ -19,6 +19,16 @@ INSERT INTO `Flight` VALUES ('Jet Blue', 226, '2023-11-09 00:00:00', 'JFK', '202
 INSERT INTO `Ticket` VALUES ('0001', 223);
 INSERT INTO `Ticket` VALUES ('0011', 223);
 INSERT INTO `Ticket` VALUES ('0002', 224);
+INSERT INTO `Ticket` VALUES ('0003', 225);
+INSERT INTO `Ticket` VALUES ('0004', 226);
+INSERT INTO `Ticket` VALUES ('0005', 225);
+INSERT INTO `Ticket` VALUES ('0006', 225);
+INSERT INTO `Ticket` VALUES ('0007', 225);
+INSERT INTO `Ticket` VALUES ('0008', 225);
+INSERT INTO `Ticket` VALUES ('0009', 225);
+INSERT INTO `Ticket` VALUES ('0010', 225);
 INSERT INTO `Purchase` VALUES ('0001', 'lucile@gmail.com', 'Debit', '2234 2314 2314 2314', '2023-12-26', 'Lucile Glassway', '2023-11-06 04:23:26', 1233.99, 'Lucile', 'Glassway', '1968-06-12');
 INSERT INTO `Purchase` VALUES ('0011', 'lucile@gmail.com', 'Debit', '2234 2314 2314 2314', '2023-12-26', 'Lucile Glassway', '2023-11-06 04:24:12', 999.99, 'Bobby', 'Glassway', '1999-01-01');
 INSERT INTO `Purchase` VALUES ('0002', 'jhc737@nyu.edu', 'Credit', '1111 1111 1111 1111', '2025-02-16', 'Justin Cheok', '2023-10-09 01:25:48', 1000.00, 'Justin', 'Cheok', '2001-10-09');
+INSERT INTO `Purchase` VALUES ('0003', 'abc@dd.f', 'Credit', '1111 1111 1111 1111', '2025-02-16', 'df', '2023-10-09 01:25:48', 1000.00, 'Justin', 'Cheok', '2001-10-09');
+INSERT INTO `Purchase` VALUES ('0004', 'abc@dd.f', 'Credit', '1111 1111 1111 1111', '2025-02-16', 'df', '2023-10-09 01:25:48', 1000.00, 'Justin', 'Cheok', '2001-10-09');
