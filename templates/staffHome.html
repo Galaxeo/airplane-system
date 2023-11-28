@@ -4,16 +4,17 @@
 </head>
 
 <!-- Use cases:
-    1. View flights (almost done, need to add more info)
+    1. View flights (almost done, have to make sure that it default shows next 30 days, and they can choose a range of dates)
     2. Create new flights (almost done, add labels, maybe make it so status is multiple choice)
     3. Change status of flights (done)
     4. Add airplane in the system (almost done, consider adding auto age)
     5. Add new airport (done)
     6. View flight ratings (done, make sure to check for more populated ratings)
-    7. Schedule maintenance
-    8. View frequent customers
-    9. View earned revenue
+    7. Schedule maintenance (done)
+    8. View frequent customer (done, maybe display more info)
+    9. View earned revenue (not done, have to include last month as well as last yera)
     10. Logout (done)
+    Additionally: enforce that only staff can do these actions
 -->
 
 <body>
@@ -34,12 +35,14 @@
         <th>Airline Name</th>
         <th>Flight Number</th>
         <th>Status</th>
+        <th>Plane ID</th>
         <th>Change Status</th>
         {% for line in data %}
         <tr>
             <td>{{line['AirlineName']}}</td>
             <td>{{line['FlightNum']}}</td>
             <td>{{line['Status']}}</td>
+            <td>{{line['PlaneID']}}</td>
             <td>
                 <form action="/staffChangeStatus" method="POST">
                     <input type="hidden" name="flightNum" value="{{line['FlightNum']}}" />
@@ -55,13 +58,6 @@
         {% endfor %}
     </table>
     {% endif %}
-
-    <!-- {% for line in posts %}
-	<tr>
-		<td>{{line['ts']}}</td>
-		<td>{{line['blog_post']}}</td>
-	</tr>
-{% endfor %} -->
 
     <form action="/staffShowFlights" method="POST">
         <input type="submit" value='See Flights' />
@@ -85,47 +81,89 @@
     <form action="/staffShowRatings" method="POST">
         <input type="submit" value='See Ratings' />
     </form>
+    View most frequent customer
+    {% if customer %}
+    {% for line in customer %}
+    <p>{{line['Email']}}</p>
+    {% endfor %}
+    {% endif %}
+    <form action="/staffShowFrequent" method="POST">
+        <input type="submit" value='See Most Frequent Customer' />
+    </form>
     <h1>Add Flight</h1>
     <form action="/staffAddFlight" method="POST">
-        <input type="text" name="flightNum" placeholder="Flight Number" required /> </br>
+        <label for="flightNum">Flight Number:</label>
+        <input type="text" id="flightNum" name="flightNum" placeholder="Flight Number" required /> <br>
         <label for="departureTime">Departure Time:</label>
-        <input type="datetime-local" name="departureTime" placeholder="Departure Time" required /> </br>
-        <input type="text" name="departureAirport" placeholder="Departure Airport" required /> </br>
+        <input type="datetime-local" id="departureTime" name="departureTime" placeholder="Departure Time" required />
+        <br>
+        <label for="departureAirport">Departure Airport:</label>
+        <input type="text" id="departureAirport" name="departureAirport" placeholder="Departure Airport" required />
+        <br>
         <label for="arrivalTime">Arrival Time:</label>
-        <input type="datetime-local" name="arrivalTime" placeholder="Arrival Time" required /> </br>
-        <input type="text" name="arrivalAirport" placeholder="Arrival Airport" required /> </br>
-        <input type="text" name="basePrice" placeholder="Base Price" required /> </br>
-        <input type="text" name="status" placeholder="Status" required /> </br>
-        <input type="text" name="planeID" placeholder="Plane ID" required /> </br>
-        <input type="submit" value='Add Flight' />
+        <input type="datetime-local" id="arrivalTime" name="arrivalTime" placeholder="Arrival Time" required /> <br>
+        <label for="arrivalAirport">Arrival Airport:</label>
+        <input type="text" id="arrivalAirport" name="arrivalAirport" placeholder="Arrival Airport" required /> <br>
+        <label for="basePrice">Base Price:</label>
+        <input type="text" id="basePrice" name="basePrice" placeholder="Base Price" required /> <br>
+        <label for="status">Status:</label>
+        <select id="status" name="status">
+            <option value="On Time">On Time</option>
+            <option value="Delayed">Delayed</option>
+            <option value="Cancelled">Cancelled</option>
+        </select> <br>
+        <input type="submit" value="Add Flight" />
     </form>
     <h1>Add Airplane</h1>
     <form action="/staffAddAirplane" method="POST">
-        <input type="text" name="planeID" placeholder="Plane ID" required /> </br>
-        <input type="text" name="numSeats" placeholder="Number of Seats" required /> </br>
-        <input type="text" name="manufacturer" placeholder="Manufacturer" required /> </br>
-        <input type="text" name="modelNum" placeholder="Model Number" required /> </br>
-        <input type="date" name="manufactureDate" placeholder="Manufacture Date" required /> </br>
-        <input type="text" name="age" placeholder="Age" required /> </br>
-        <input type="submit" value='Add Airplane' />
-        <a href="/logout">Logout</a>
+        <label for="planeID">Plane ID:</label>
+        <input type="text" id="planeID" name="planeID" placeholder="Plane ID" required /> <br>
+        <label for="numSeats">Number of Seats:</label>
+        <input type="text" id="numSeats" name="numSeats" placeholder="Number of Seats" required /> <br>
+        <label for="manufacturer">Manufacturer:</label>
+        <input type="text" id="manufacturer" name="manufacturer" placeholder="Manufacturer" required /> <br>
+        <label for="modelNum">Model Number:</label>
+        <input type="text" id="modelNum" name="modelNum" placeholder="Model Number" required /> <br>
+        <label for="manufactureDate">Manufacture Date:</label>
+        <input type="date" id="manufactureDate" name="manufactureDate" placeholder="Manufacture Date" required /> <br>
+        <label for="age">Age:</label>
+        <input type="text" id="age" name="age" placeholder="Age" required /> <br>
+        <input type="submit" value="Add Airplane" />
     </form>
     <h1>Add Airport</h1>
     <form action="/staffAddAirport" method="POST">
-        <input type="text" name="airportCode" placeholder="Airport Code" required /> </br>
-        <input type="text" name="airportName" placeholder="Airport Name" required /> </br>
-        <input type="text" name="airportCity" placeholder="Airport City" required /> </br>
-        <input type="text" name="airportState" placeholder="Airport State" required /> </br>
-        <input type="text" name="numTerminals" placeholder="Number of Terminals" required /> </br>
-        Airport Type:
-        <select name="type">
+        <label for="airportCode">Airport Code:</label>
+        <input type="text" id="airportCode" name="airportCode" placeholder="Airport Code" required /> <br>
+        <label for="airportName">Airport Name:</label>
+        <input type="text" id="airportName" name="airportName" placeholder="Airport Name" required /> <br>
+        <label for="airportCity">Airport City:</label>
+        <input type="text" id="airportCity" name="airportCity" placeholder="Airport City" required /> <br>
+        <label for="airportState">Airport State:</label>
+        <input type="text" id="airportState" name="airportState" placeholder="Airport State" required /> <br>
+        <label for="numTerminals">Number of Terminals:</label>
+        <input type="text" id="numTerminals" name="numTerminals" placeholder="Number of Terminals" required /> <br>
+        <label for="type">Type:</label>
+        <select id="type" name="type">
             <option value="International">International</option>
             <option value="Domestic">Domestic</option>
-            <option value="Both">Both</option>
+            <option value="Cancelled">Both</option>
         </select>
-        <input type="submit" value='Add Airport' />
-        <a href="/logout">Logout</a>
+        <br>
+        <input type="submit" value="Add Airport" />
     </form>
+    <h1>Schedule Maintenance</h1>
+    <form action="/staffScheduleMaintenance" method="POST">
+        <label for="planeID">Plane ID:</label>
+        <input type="text" id="planeID" name="planeID" placeholder="Plane ID" required /> <br>
+        <label for="maintenanceID">Maintenance ID:</label>
+        <input type="text" id="maintenanceID" name="maintenanceID" placeholder="Maintenance ID" required /> <br>
+        <label for="start">Start:</label>
+        <input type="datetime-local" id="start" name="start" placeholder="Start" required /> <br>
+        <label for="end">End:</label>
+        <input type="datetime-local" id="end" name="end" placeholder="End" required /> <br>
+        <input type="submit" value="Schedule Maintenance" />
+    </form>
+    <a href="/logout">Logout</a>
 </body>
 
 

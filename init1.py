@@ -187,11 +187,14 @@ def staffAddFlight():
 	basePrice = request.form['basePrice']
 	status = request.form['status']
 	planeID = request.form['planeID']
-	cursor = conn.cursor()
-	ins = 'INSERT INTO flight VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)'
-	cursor.execute(ins, (airlineName, flightNum, departureTime, departureAirport, arrivalTime, arrivalAirport, basePrice, status, planeID))
-	conn.commit()
-	cursor.close()
+	try:
+		cursor = conn.cursor()
+		ins = 'INSERT INTO flight VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)'
+		cursor.execute(ins, (airlineName, flightNum, departureTime, departureAirport, arrivalTime, arrivalAirport, basePrice, status, planeID))
+		conn.commit()
+		cursor.close()
+	except:
+		return render_template('staffHome.html', username=username, message="Please make sure that the fields are correct")
 	return render_template('staffHome.html', username=username, message="Flight added successfully")
 # Change status of flight
 @app.route('/staffChangeStatus', methods=['GET', 'POST'])
@@ -234,12 +237,15 @@ def staffAddAirport():
 	airportState = request.form['airportState']
 	numTerminals = request.form['numTerminals']
 	type = request.form['type']
-	cursor = conn.cursor()
-	ins = 'INSERT INTO airport VALUES(%s, %s, %s, %s, %s, %s)'
-	cursor.execute(ins, (airportCode, airportName, airportCity, airportState, numTerminals, type))
-	conn.commit()
-	cursor.close()
-	return render_template('staffHome.html', username=username, message="Airport added successfully")
+	try:
+		cursor = conn.cursor()
+		ins = 'INSERT INTO airport VALUES(%s, %s, %s, %s, %s, %s)'
+		cursor.execute(ins, (airportCode, airportName, airportCity, airportState, numTerminals, type))
+		conn.commit()
+		cursor.close()
+		return render_template('staffHome.html', username=username, message="Airport added successfully")
+	except:
+		return render_template('staffHome.html', username=username, message="Please make sure that the fields are correct")
 # Show all ratings
 @app.route('/staffShowRatings', methods=['GET', 'POST'])
 def staffShowRatings():
@@ -251,6 +257,35 @@ def staffShowRatings():
 	data = cursor.fetchall()
 	cursor.close()
 	return render_template('staffHome.html', username=username, ratings=data)
+# Schedule maintenance
+@app.route('/staffScheduleMaintenance', methods=['GET', 'POST'])
+def staffScheduleMaintenance():
+	username = session['username']
+	maintenanceID = request.form['maintenanceID']
+	planeID = request.form['planeID']
+	startTime = request.form['start']
+	endTime = request.form['end']
+	try:
+		cursor = conn.cursor()
+		ins = 'INSERT INTO maintenance VALUES(%s, %s, %s, %s)'
+		cursor.execute(ins, (planeID, maintenanceID, startTime, endTime))
+		conn.commit()
+		cursor.close()
+		return render_template('staffHome.html', username=username, message="Maintenance scheduled successfully")
+	except:
+		return render_template('staffHome.html', username=username, message="Please make sure that the fields are correct")
+# Show the most frequent customer (most tickets bought)
+@app.route('/staffShowFrequent', methods=['GET', 'POST'])
+def staffShowFrequentCustomer():
+	username = session['username']
+	airlineName = session['airlineName']
+	cursor = conn.cursor();
+	# query that selects the customer with the most tickets bought
+	query = 'SELECT * FROM customer as c, ticket as t, purchase as p, flight as f WHERE c.email = p.email AND p.TicketID = t.ticketID AND t.FlightNum = f.FlightNum AND f.AirlineName = %s GROUP BY c.email ORDER BY COUNT(*) DESC LIMIT 1'
+	cursor.execute(query, (airlineName))
+	data = cursor.fetchall()
+	cursor.close()
+	return render_template('staffHome.html', username=username, customer=data)
 
 #Authenticates the login
 @app.route('/loginAuth', methods=['GET', 'POST'])
