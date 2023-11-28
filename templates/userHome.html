@@ -8,7 +8,7 @@
 <!-- Use cases:
     1. View my flights (almost done, default to showing future flights)
     2. Search for flights (almost done, don't show flights that already went)
-    3. Purchase ticket
+    3. Purchase ticket (in progress, need to implement in init1.py)
     4. Cancel trip
     5. Give ratings
     6. Track spending
@@ -73,6 +73,30 @@
         {% endfor %}
     </table>
     {% endif %}
+    <h1>Purchase Ticket</h1>
+    <form action="/userPurchaseTicket" method="POST">
+        <label for="flightNum">Flight Number:</label>
+        <input type="text" id="flightNum" name="flightNum" placeholder="Flight Number" required /> <br>
+        <label for="CardType">Status:</label>
+        <select id="CardType" name="type">
+            <option value="Credit">Credit</option>
+            <option value="Debit">Debit</option>
+        </select> <br>
+        <label for="CardNum">Credit Card Number:</label>
+        <input type="text" id="creditCardNum" name="creditCardNum" placeholder="Credit Card Number" required /> <br>
+        <label for="CardExp">Credit Card Expiration Date:</label>
+        <input type="date" id="creditCardExp" name="creditCardExp" placeholder="Credit Card Expiration Date" required />
+        <br>
+        <label for="cardName">Name on Card:</label>
+        <input type="text" id="cardName" name="cardName" placeholder="Name on Card" required /> <br>
+        <label for="firstName">Ticketholder's First Name:</label>
+        <input type="text" id="firstName" name="firstName" placeholder="First Name" required /> <br>
+        <label for="lastName">Ticketholder's Last Name:</label>
+        <input type="text" id="lastName" name="lastName" placeholder="Last Name" required /> <br>
+        <label for="dateOfBirth">Date of Birth:</label>
+        <input type="date" id="dateOfBirth" name="dateOfBirth" placeholder="Date of Birth" required /> <br>
+        <input type="submit" value="Purchase Ticket" />
+    </form>
     <a href="/userLogout">Logout</a>
 
 </body>
