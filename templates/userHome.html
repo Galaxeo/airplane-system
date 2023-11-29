@@ -8,14 +8,21 @@
 <!-- Use cases:
     1. View my flights (almost done, default to showing future flights)
     2. Search for flights (almost done, don't show flights that already went)
-    3. Purchase ticket (in progress, need to implement in init1.py)
-    4. Cancel trip
+    3. Purchase ticket (almost done, need to make sure flight is not already done)
+    4. Cancel trip (done)
     5. Give ratings
     6. Track spending
     7. Logout (done)
 -->
 
 <body>
+    <style type="text/css">
+        table,
+        th,
+        td {
+            border: 1px solid black;
+        }
+    </style>
     {% if message %}
     <p class="error"><strong>Message:</strong> {{message}}</p>
     {% endif %}
@@ -31,12 +38,19 @@
         <th>Flight Number</th>
         <th>Airline Name</th>
         <th>Ticket ID</th>
+        <th>Cancel Trip</th>
 
         {% for line in flights %}
         <tr>
             <td>{{line['FlightNum']}}</td>
             <td>{{line['AirlineName']}}</td>
             <td>{{line['TicketID']}}</td>
+            <td>
+                <form action="/userCancelTicket" method="POST">
+                    <input type="hidden" name="ticketID" value="{{line['TicketID']}}" />
+                    <input type="submit" value="Cancel Trip" />
+                </form>
+            </td>
         </tr>
         {% endfor %}
     </table>
@@ -77,15 +91,15 @@
     <form action="/userPurchaseTicket" method="POST">
         <label for="flightNum">Flight Number:</label>
         <input type="text" id="flightNum" name="flightNum" placeholder="Flight Number" required /> <br>
-        <label for="CardType">Status:</label>
-        <select id="CardType" name="type">
+        <label for="cardType">Status:</label>
+        <select id="cardType" name="cardType">
             <option value="Credit">Credit</option>
             <option value="Debit">Debit</option>
         </select> <br>
-        <label for="CardNum">Credit Card Number:</label>
-        <input type="text" id="creditCardNum" name="creditCardNum" placeholder="Credit Card Number" required /> <br>
-        <label for="CardExp">Credit Card Expiration Date:</label>
-        <input type="date" id="creditCardExp" name="creditCardExp" placeholder="Credit Card Expiration Date" required />
+        <label for="cardNum">Credit Card Number:</label>
+        <input type="text" id="cardNum" name="cardNum" placeholder="Credit Card Number" required /> <br>
+        <label for="cardExp">Credit Card Expiration Date:</label>
+        <input type="date" id="cardExp" name="cardExp" placeholder="Credit Card Expiration Date" required />
         <br>
         <label for="cardName">Name on Card:</label>
         <input type="text" id="cardName" name="cardName" placeholder="Name on Card" required /> <br>
@@ -97,6 +111,9 @@
         <input type="date" id="dateOfBirth" name="dateOfBirth" placeholder="Date of Birth" required /> <br>
         <input type="submit" value="Purchase Ticket" />
     </form>
+    {% if avail %}
+    {{avail}}
+    {% endif %}
     <a href="/userLogout">Logout</a>
 
 </body>

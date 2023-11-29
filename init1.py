@@ -140,7 +140,60 @@ def userSearchFlights():
 	data = cursor.fetchall()
 	cursor.close()
 	return render_template('userHome.html', firstName=firstName, searched=data)
-
+# Purchase ticket
+@app.route('/userPurchaseTicket', methods=['GET', 'POST'])
+def userPurchaseTicket():
+	# Use userhome.html as reference for inputs
+	firstName = session['firstName']
+	email = session['email']
+	flightNum = request.form['flightNum']
+	cardType = request.form['cardType']
+	cardNum = request.form['cardNum']
+	cardExp = request.form['cardExp']
+	# check if card date is valid
+	if datetime.strptime(cardExp, '%Y-%m-%d') < datetime.now():
+		return render_template('userHome.html', firstName=firstName, message="Invalid card date")
+	cardName = request.form['cardName']
+	purchaseTime = datetime.now()
+	ticketFirstName = request.form['firstName']
+	lastName = request.form['lastName']
+	dateOfBirth = request.form['dateOfBirth']
+	# check if date of birth is before today
+	if datetime.strptime(dateOfBirth, '%Y-%m-%d') > datetime.now():
+		return render_template('userHome.html', firstName=firstName, message="Invalid date of birth")
+	# available tickets are the ones that are not purchased
+	query = 'SELECT * FROM ticket WHERE FlightNum = %s AND TicketID NOT IN (SELECT TicketID FROM purchase)'
+	cursor = conn.cursor()
+	cursor.execute(query, (flightNum))
+	# if no tickets are available, return error
+	if cursor.rowcount == 0:
+		return render_template('userHome.html', firstName=firstName, message="No tickets available")
+	# otherwise, purchase the ticket
+	# calculated price is same as base price from flight for now
+	else:
+		data = cursor.fetchone()
+		ticketID = data['TicketID']
+		# fetch base price from flight
+		query = 'SELECT basePrice FROM flight WHERE FlightNum = %s'
+		cursor.execute(query, (flightNum))
+		price = cursor.fetchone()['basePrice']
+		ins = 'INSERT INTO purchase VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s )'
+		cursor.execute(ins, (ticketID, email, cardType, cardNum, cardExp, cardName, purchaseTime, price, ticketFirstName, lastName, dateOfBirth))
+		conn.commit()
+		cursor.close()
+		return render_template('userHome.html', firstName=firstName, message="Ticket purchased successfully")
+# Cancel ticket
+@app.route('/userCancelTicket', methods=['GET', 'POST'])
+def userCancelTicket():
+	firstName = session['firstName']
+	email = session['email']
+	ticketID = request.form['ticketID']
+	cursor = conn.cursor()
+	query = 'DELETE FROM purchase WHERE TicketID = %s AND email = %s'
+	cursor.execute(query, (ticketID, email))
+	conn.commit()
+	cursor.close()
+	return render_template('userHome.html', firstName=firstName, message="Ticket cancelled successfully")
 
 # ------ All staff oriented routes ------ #
 # Authenticate register for staff
