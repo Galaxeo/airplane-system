@@ -10,8 +10,8 @@
     2. Search for flights (almost done, don't show flights that already went)
     3. Purchase ticket (almost done, need to make sure flight is not already done)
     4. Cancel trip (done)
-    5. Give ratings
-    6. Track spending
+    5. Give ratings (done, maybe consider restricting 1 rating per flight)
+    6. Track spending (in-progress, have to add range of dates to select between, where purchase time within range)
     7. Logout (done)
 -->
 
@@ -114,13 +114,9 @@
     {% if avail %}
     {{avail}}
     {% endif %}
-    form for ratings
-    <h1>Give Reviews/Ratings</h1>
-    <form action="/userRatingsTable" method="POST">
-        <input type="submit" value="Give Reviews/Ratings" />
-    </form>
     {% if ratings%}
     <table>
+        <th>Ticket ID</th>
         <th>Flight Number</th>
         <th>Airline Name</th>
         <th>Departure Time</th>
@@ -129,6 +125,7 @@
 
         {% for line in ratings%}
         <tr>
+            <td>{{line['TicketID']}}</td>
             <td>{{line['FlightNum']}}</td>
             <td>{{line['AirlineName']}}</td>
             <td>{{line['DepartureTime']}}</td>
@@ -144,7 +141,18 @@
         {% endfor %}
     </table>
     {% endif %}
-
+    <form action="/userRatingsTable" method="POST">
+        <input type="submit" value="Give Reviews/Ratings" />
+    </form>
+    {% if spending %}
+    <h3>Total Spending</h3>
+    {% for line in spending %}
+    ${{line['SUM(calculatedPrice)']}}
+    {% endfor %}
+    {% endif %}
+    <form action="/userTotalSpending" method="POST">
+        <input type="submit" value="Track Spending" />
+    </form>
 
     <a href="/userLogout">Logout</a>
 

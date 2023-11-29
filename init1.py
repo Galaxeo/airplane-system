@@ -227,6 +227,17 @@ def userSubmitRating():
 	conn.commit()
 	cursor.close()
 	return render_template('userHome.html', email=email, firstName=firstName, message="Rating submitted successfully")
+# Return total spending by calculating sum of calculated price of tickets where ticket.ticketid = purchase.ticketid and purchase.email = email
+@app.route('/userTotalSpending', methods=['GET', 'POST'])
+def userTotalSpending():
+	email = session['email']
+	firstName = session['firstName']
+	cursor = conn.cursor();
+	query = 'SELECT SUM(calculatedPrice) FROM ticket as t, purchase as p WHERE t.ticketID = p.TicketID AND p.email = %s'
+	cursor.execute(query, (email))
+	data = cursor.fetchall()
+	cursor.close()
+	return render_template('userHome.html', email=email, firstName=firstName, spending=data)
 
 # ------ All staff oriented routes ------ #
 # Authenticate register for staff
