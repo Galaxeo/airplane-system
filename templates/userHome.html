@@ -114,6 +114,38 @@
     {% if avail %}
     {{avail}}
     {% endif %}
+    form for ratings
+    <h1>Give Reviews/Ratings</h1>
+    <form action="/userRatingsTable" method="POST">
+        <input type="submit" value="Give Reviews/Ratings" />
+    </form>
+    {% if ratings%}
+    <table>
+        <th>Flight Number</th>
+        <th>Airline Name</th>
+        <th>Departure Time</th>
+        <th>ArrivalTime</th>
+        <th>Give Rating</th>
+
+        {% for line in ratings%}
+        <tr>
+            <td>{{line['FlightNum']}}</td>
+            <td>{{line['AirlineName']}}</td>
+            <td>{{line['DepartureTime']}}</td>
+            <td>{{line['ArrivalTime']}}</td>
+            <td>
+                <form action="/userGiveRating" method="POST">
+                    <input type="hidden" name="flightNum" value="{{line['FlightNum']}}" />
+                    <input type="hidden" name="email" value="{{email}}" />
+                    <input type="submit" value="Give Rating" />
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+
+
     <a href="/userLogout">Logout</a>
 
 </body>

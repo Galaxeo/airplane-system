@@ -194,6 +194,39 @@ def userCancelTicket():
 	conn.commit()
 	cursor.close()
 	return render_template('userHome.html', firstName=firstName, message="Ticket cancelled successfully")
+# Show previous flights
+@app.route('/userRatingsTable', methods=['GET', 'POST'])
+def userShowPreviousFlights():
+	email = session['email']
+	firstName = session['firstName']
+	cursor = conn.cursor();
+	# query that selects all flights that the user has purchased and that have already happened
+	query = 'SELECT * FROM flight as f, ticket as t, purchase as p WHERE p.email = %s AND p.TicketID = t.TicketID AND t.FlightNum = f.FlightNum AND f.arrivalTime < NOW()'
+	cursor.execute(query, (email))
+	data = cursor.fetchall()
+	cursor.close()
+	return render_template('userHome.html', email=email, firstName=firstName, ratings=data)
+# User clicks on give rating button, redirects to rating page with flightNum and email parameters
+@app.route('/userGiveRating', methods=['GET', 'POST'])
+def userGiveRating():
+	email = session['email']
+	firstName = session['firstName']
+	flightNum = request.form['flightNum']
+	return render_template('userRatings.html', email=email, firstName=firstName, flightNum=flightNum)
+# User submits rating
+@app.route('/userSubmitRating', methods=['GET', 'POST'])
+def userSubmitRating():
+	email = session['email']
+	firstName = session['firstName']
+	flightNum = request.form['flightNum']
+	rating = request.form['rating']
+	comment = request.form['comment']
+	cursor = conn.cursor()
+	ins = 'INSERT INTO rating VALUES(%s, %s, %s, %s)'
+	cursor.execute(ins, (email, rating, flightNum, comment))
+	conn.commit()
+	cursor.close()
+	return render_template('userHome.html', email=email, firstName=firstName, message="Rating submitted successfully")
 
 # ------ All staff oriented routes ------ #
 # Authenticate register for staff
