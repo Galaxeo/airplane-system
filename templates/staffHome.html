@@ -4,14 +4,14 @@
 </head>
 
 <!-- Use cases:
-    1. View flights (almost done, have to make sure that it default shows next 30 days, and they can choose a range of dates)
+    1. View flights (almost done, see all customers of a flight, search by source/destination airports/city)
     2. Create new flights (almost done)
     3. Change status of flights (done)
-    4. Add airplane in the system (almost done, consider adding auto age)
+    4. Add airplane in the system (done)
     5. Add new airport (done)
     6. View flight ratings (done, make sure to check for more populated ratings)
     7. Schedule maintenance (done)
-    8. View frequent customer (almost, add list of flights that customer has taken)
+    8. View frequent customer (done)
     9. View earned revenue (almost done, have to include last month as well as last year)
     10. Logout (done)
     Additionally: enforce that only staff can do these actions
@@ -31,19 +31,44 @@
         }
     </style>
 
+    {% if customers %}
+    <h3>Customers for flight {{flightNum}}</h3>
+    <table>
+        <th>Customer Email</th>
+        <th>First Name</th>
+        <th>Last Name</th>
+        {% for line in customers %}
+        <tr>
+            <td>{{line['Email']}}</td>
+            <td>{{line['FirstName']}}</td>
+            <td>{{line['LastName']}}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
     {% if data%}
+    <h3>Flights:</h3>
     <table>
         <th>Airline Name</th>
         <th>Flight Number</th>
-        <th>Status</th>
         <th>Plane ID</th>
+        <th>Departure Airport</th>
+        <th>Departure Time</th>
+        <th>Arrival Time</th>
+        <th>Arrival Airport</th>
+        <th>Status</th>
         <th>Change Status</th>
+        <th>View Customers</th>
         {% for line in data %}
         <tr>
             <td>{{line['AirlineName']}}</td>
             <td>{{line['FlightNum']}}</td>
-            <td>{{line['Status']}}</td>
             <td>{{line['PlaneID']}}</td>
+            <td>{{line['DepartureAirport']}}</td>
+            <td>{{line['DepartureTime']}}</td>
+            <td>{{line['ArrivalTime']}}</td>
+            <td>{{line['ArrivalAirport']}}</td>
+            <td>{{line['Status']}}</td>
             <td>
                 <form action="/staffChangeStatus" method="POST">
                     <input type="hidden" name="flightNum" value="{{line['FlightNum']}}" />
@@ -55,14 +80,31 @@
                     <input type="submit" value="Change Status" />
                 </form>
             </td>
+            <td>
+                <form action="/staffViewCustomers" method="POST">
+                    <input type="hidden" name="flightNum" value="{{line['FlightNum']}}" />
+                    <input type="hidden" name="flights" value="{{data}}">
+                    <input type="submit" value="View Customers" />
+                </form>
+            </td>
         </tr>
         {% endfor %}
     </table>
     {% endif %}
 
     <form action="/staffShowFlights" method="POST">
+        <h3>Search Filters:</h3>
+        <label for="startDate">Start Date:</label>
+        <input type="date" id="startDate" name="startDate" placeholder="Start Date" /> <br>
+        <label for="endDate">End Date:</label>
+        <input type="date" id="endDate" name="endDate" placeholder="End Date" /> <br>
+        <label for="departureAirport">Departure Airport:</label>
+        <input type="text" id="departureAirport" name="departureAirport" placeholder="Departure Airport Code" /> <br>
+        <label for="arrivalAirport">Arrival Airport:</label>
+        <input type="text" id="arrivalAirport" name="arrivalAirport" placeholder="Arrival Airport Code" /> <br>
         <input type="submit" value='See Flights' />
     </form>
+    <h1>Utilities: </h1>
     {% if ratings %}
     <table>
         <th>Flight Number</th>
@@ -84,14 +126,33 @@
     </form>
     {% if customer %}
     {% for line in customer %}
+    <h3>Most Frequent Customer: </h3>
     <p>{{line['Email']}}</p>
     {% endfor %}
+    <h3>Their flights:</h3>
+    <table>
+        <th>Flight Number</th>
+        <th>Departure Airport</th>
+        <th>Departure Time</th>
+        <th>Arrival Airport</th>
+        <th>Arrival Time</th>
+        {% for line in customerFlights %}
+        <tr>
+            <td>{{line['FlightNum']}}</td>
+            <td>{{line['DepartureAirport']}}</td>
+            <td>{{line['DepartureTime']}}</td>
+            <td>{{line['ArrivalAirport']}}</td>
+            <td>{{line['ArrivalTime']}}</td>
+        </tr>
+        {% endfor %}
+    </table>
     {% endif %}
     <form action="/staffShowFrequent" method="POST">
         <input type="submit" value='See Most Frequent Customer' />
     </form>
     {% if revenue %}
     {% for line in revenue %}
+    <h3>Total Earned Revenue</h3>
     <p>{{line['SUM(calculatedPrice)']}}</p>
     {% endfor %}
     {% endif %}
@@ -134,8 +195,6 @@
         <input type="text" id="modelNum" name="modelNum" placeholder="Model Number" required /> <br>
         <label for="manufactureDate">Manufacture Date:</label>
         <input type="date" id="manufactureDate" name="manufactureDate" placeholder="Manufacture Date" required /> <br>
-        <label for="age">Age:</label>
-        <input type="text" id="age" name="age" placeholder="Age" required /> <br>
         <input type="submit" value="Add Airplane" />
     </form>
     <h1>Add Airport</h1>

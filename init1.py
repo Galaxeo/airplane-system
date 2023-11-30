@@ -270,10 +270,10 @@ def staffRegisterAuth():
 			cursor.execute(ins, (username, password, airlineName, firstName, lastName, dateOfBirth))
 			conn.commit()
 			cursor.close()
+			return render_template('index.html', message="Staff member added successfully")
 		except:
 			error = "Please make sure that the fields are correct"
 			return render_template('staffRegister.html', error = error)
-		return render_template('index.html')
 @app.route('/staffLogin')
 def staffLogin():
 	return render_template('staffLogin.html')
@@ -304,9 +304,42 @@ def staffHome():
 def staffShowFlights():
 	username = session['username']
 	airlineName = session['airlineName']
-	cursor = conn.cursor();
+	startDate = request.form['startDate']
+	endDate = request.form['endDate']
+	departureAirport = request.form['departureAirport']
+	arrivalAirport = request.form['arrivalAirport']
+	cursor = conn.cursor()
+
+	# Build the base query
 	query = 'SELECT * FROM flight WHERE AirlineName = %s'
-	cursor.execute(query, (airlineName))
+
+	# Create a list to store the query parameters
+	params = [airlineName]
+
+	# Check if startDate and endDate are provided
+	if startDate and endDate:
+		query += ' AND DepartureTime BETWEEN %s AND %s'
+		params.extend([startDate, endDate])
+
+	# Check if departureAirport is provided
+	if departureAirport:
+		query += ' AND DepartureAirport = %s'
+		params.append(departureAirport)
+
+	# Check if arrivalAirport is provided
+	if arrivalAirport:
+		query += ' AND ArrivalAirport = %s'
+		params.append(arrivalAirport)
+
+	# If none of these fields are provided, show flights for the next 30 days
+	query += ' AND DepartureTime BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 30 DAY)'
+	# Add the ORDER BY clause
+	query += ' ORDER BY DepartureTime'
+
+
+	# Execute the query with the parameters
+	cursor.execute(query, params)
+
 	data = cursor.fetchall()
 	cursor.close()
 	return render_template('staffHome.html', username=username, data=data)
@@ -332,6 +365,20 @@ def staffAddFlight():
 	except:
 		return render_template('staffHome.html', username=username, message="Please make sure that the fields are correct")
 	return render_template('staffHome.html', username=username, message="Flight added successfully")
+# View customers of a flight
+@app.route('/staffViewCustomers', methods=['GET', 'POST'])
+def staffViewCustomers():
+	username = session['username']
+	airlineName = session['airlineName']
+	flightNum = request.form['flightNum']
+	flights = request.form['flights']
+	cursor = conn.cursor();
+	# query that selects all customers that have purchased tickets for the given flight
+	query = 'SELECT * FROM customer as c, ticket as t, purchase as p WHERE t.FlightNum = %s AND t.TicketID = p.TicketID AND p.email = c.email'
+	cursor.execute(query, (flightNum))
+	data = cursor.fetchall()
+	cursor.close()
+	return render_template('staffHome.html', username=username, customers=data, flightNum=flightNum)
 # Change status of flight
 @app.route('/staffChangeStatus', methods=['GET', 'POST'])
 def staffChangeStatus():
@@ -355,7 +402,7 @@ def staffAddAirplane():
 	manufacturer = request.form['manufacturer']
 	modelNum = request.form['modelNum']
 	manufactureDate = request.form['manufactureDate']
-	age = request.form['age']
+	age = datetime.now().year - datetime.strptime(manufactureDate, '%Y-%m-%d').year
 	cursor = conn.cursor()
 	ins = 'INSERT INTO airplane VALUES(%s, %s, %s, %s, %s, %s, %s)'
 	cursor.execute(ins, (planeID, airlineName, numSeats, manufacturer, modelNum, manufactureDate, age))
@@ -419,10 +466,15 @@ def staffShowFrequentCustomer():
 	# query that selects the customer with the most tickets bought
 	query = 'SELECT * FROM customer as c, ticket as t, purchase as p, flight as f WHERE c.email = p.email AND p.TicketID = t.ticketID AND t.FlightNum = f.FlightNum AND f.AirlineName = %s GROUP BY c.email ORDER BY COUNT(*) DESC LIMIT 1'
 	cursor.execute(query, (airlineName))
-	data = cursor.fetchall()
+	customerData = cursor.fetchall()
+	# query to select all flights that customer has taken
+	query = 'SELECT * FROM flight as f, ticket as t, purchase as p WHERE p.email = %s AND p.TicketID = t.TicketID AND t.FlightNum = f.FlightNum'
+	cursor.execute(query, (customerData[0]['Email']))
+	flightData = cursor.fetchall()
 	cursor.close()
-	return render_template('staffHome.html', username=username, customer=data)
+	return render_template('staffHome.html', username=username, customer=customerData, customerFlights=flightData)
 # Show earned revenue, this is done by calculating sum of calculated price of tickets where ticket.ticketid = purchase.ticketid and ticket.flightnum = flight.flightnum and flight.airlinename = airlineName
+# TODO: Add date range and default last 30 days
 @app.route('/staffShowRevenue', methods=['GET', 'POST'])
 def staffShowRevenue():
 	username = session['username']
