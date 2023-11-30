@@ -11,7 +11,7 @@
     3. Purchase ticket (almost done, need to make sure flight is not already done)
     4. Cancel trip (done)
     5. Give ratings (done, maybe consider restricting 1 rating per flight)
-    6. Track spending (in-progress, have to add range of dates to select between, where purchase time within range)
+    6. Track spending (done)
     7. Logout (done)
 -->
 
@@ -38,6 +38,11 @@
         <th>Flight Number</th>
         <th>Airline Name</th>
         <th>Ticket ID</th>
+        <th>Departure Time</th>
+        <th>Arrival Time</th>
+        <th>Departure Airport</th>
+        <th>Arrival Airport</th>
+        <th>Status</th>
         <th>Cancel Trip</th>
 
         {% for line in flights %}
@@ -45,6 +50,11 @@
             <td>{{line['FlightNum']}}</td>
             <td>{{line['AirlineName']}}</td>
             <td>{{line['TicketID']}}</td>
+            <td>{{line['DepartureTime']}}</td>
+            <td>{{line['ArrivalTime']}}</td>
+            <td>{{line['DepartureAirport']}}</td>
+            <td>{{line['ArrivalAirport']}}</td>
+            <td>{{line['Status']}}</td>
             <td>
                 <form action="/userCancelTicket" method="POST">
                     <input type="hidden" name="ticketID" value="{{line['TicketID']}}" />
@@ -144,13 +154,18 @@
     <form action="/userRatingsTable" method="POST">
         <input type="submit" value="Give Reviews/Ratings" />
     </form>
+    <h3>Track Spending</h3>
     {% if spending %}
-    <h3>Total Spending</h3>
     {% for line in spending %}
-    ${{line['SUM(calculatedPrice)']}}
+    <p>Total Amount from {{dateFrom}} to {{dateTo}}: ${{line['SUM(calculatedPrice)']}}
+    </p>
     {% endfor %}
     {% endif %}
     <form action="/userTotalSpending" method="POST">
+        <label for="dateFrom">From:</label>
+        <input type="date" id="dateFrom" name="dateFrom" placeholder="Date From" required /><br>
+        <label for="dateTo">To:</label>
+        <input type="date" id="dateTo" name="dateTo" placeholder="Date To" required /><br>
         <input type="submit" value="Track Spending" />
     </form>
 

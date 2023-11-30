@@ -119,7 +119,7 @@ def userViewFlights():
 	email = session['email']
 	cursor = conn.cursor();
 	# query where we select all flights that the user has purchased
-	query = 'SELECT f.FlightNum, f.AirlineName, p.TicketID FROM flight as f, ticket as t, purchase as p WHERE p.email = %s AND p.TicketID = t.TicketID AND t.FlightNum = f.FlightNum'
+	query = 'SELECT f.FlightNum, f.AirlineName, p.TicketID, f.DepartureTime, f.ArrivalTime, f.DepartureAirport, f.ArrivalAirport, f.Status FROM flight as f, ticket as t, purchase as p WHERE p.email = %s AND p.TicketID = t.TicketID AND t.FlightNum = f.FlightNum'
 	# query all flights
 	# query = 'SELECT * FROM flight'
 	cursor.execute(query, (email))
@@ -232,12 +232,19 @@ def userSubmitRating():
 def userTotalSpending():
 	email = session['email']
 	firstName = session['firstName']
+	dateFrom = request.form['dateFrom']
+	dateTo = request.form['dateTo']
+	# Query calculating sum of price of all tickets that the user has purchased between the given dates
+	query = 'SELECT SUM(calculatedPrice) FROM ticket as t, purchase as p WHERE t.ticketID = p.TicketID AND p.email = %s AND p.purchaseTime BETWEEN %s AND %s'
 	cursor = conn.cursor();
-	query = 'SELECT SUM(calculatedPrice) FROM ticket as t, purchase as p WHERE t.ticketID = p.TicketID AND p.email = %s'
-	cursor.execute(query, (email))
+	cursor.execute(query, (email, dateFrom, dateTo))
 	data = cursor.fetchall()
-	cursor.close()
-	return render_template('userHome.html', email=email, firstName=firstName, spending=data)
+	if (data):
+		cursor.close()
+		return render_template('userHome.html', email=email, firstName=firstName, spending=data, dateFrom=dateFrom, dateTo=dateTo)
+	else:
+		cursor.close()
+		return render_template('userHome.html', email=email, firstName=firstName, message="No spending to show")
 
 # ------ All staff oriented routes ------ #
 # Authenticate register for staff
