@@ -118,10 +118,8 @@ def userViewFlights():
 	firstName = session['firstName']
 	email = session['email']
 	cursor = conn.cursor();
-	# query where we select all flights that the user has purchased
-	query = 'SELECT f.FlightNum, f.AirlineName, p.TicketID, f.DepartureTime, f.ArrivalTime, f.DepartureAirport, f.ArrivalAirport, f.Status FROM flight as f, ticket as t, purchase as p WHERE p.email = %s AND p.TicketID = t.TicketID AND t.FlightNum = f.FlightNum'
-	# query all flights
-	# query = 'SELECT * FROM flight'
+	# query where we select all flights that the user has purchased and that have not happened yet
+	query = 'SELECT * FROM flight as f, ticket as t, purchase as p WHERE p.email = %s AND p.TicketID = t.TicketID AND t.FlightNum = f.FlightNum AND f.departureTime > NOW()'
 	cursor.execute(query, (email))
 	data = cursor.fetchall()
 	cursor.close()
@@ -134,9 +132,25 @@ def userSearchFlights():
 	arrivalAirport = request.form['arrivalAirport']
 	departureTime = request.form['departureTime']
 	arrivalTime = request.form['arrivalTime']
-	cursor = conn.cursor();
-	query = 'SELECT * FROM flight WHERE departureAirport = %s OR arrivalAirport = %s OR departureTime = %s OR arrivalTime = %s'
-	cursor.execute(query, (departureAirport, arrivalAirport, departureTime, arrivalTime))
+	cursor = conn.cursor()
+
+	# Build the base query
+	query = 'SELECT * FROM flight WHERE departureTime > NOW()'
+	params = []
+	if departureAirport:
+		query += ' AND departureAirport = %s'
+		params.append(departureAirport)
+	if arrivalAirport:
+		query += ' AND arrivalAirport = %s'
+		params.append(arrivalAirport)
+	if departureTime:
+		query += ' AND departureTime = %s'
+		params.append(departureTime)
+	if arrivalTime:
+		query += ' AND arrivalTime = %s'
+		params.append(arrivalTime)
+	cursor.execute(query, params)
+
 	data = cursor.fetchall()
 	cursor.close()
 	return render_template('userHome.html', firstName=firstName, searched=data)
@@ -481,11 +495,16 @@ def staffShowRevenue():
 	airlineName = session['airlineName']
 	try:
 		cursor = conn.cursor();
-		query = 'SELECT SUM(calculatedPrice) FROM ticket as t, purchase as p, flight as f WHERE t.ticketID = p.TicketID AND t.FlightNum = f.FlightNum AND f.AirlineName = %s'
+		# query sum of calculated price of all tickets that the airline has sold within the last 30 days by default
+		query = 'SELECT SUM(calculatedPrice) FROM ticket as t, purchase as p, flight as f WHERE t.ticketID = p.TicketID AND t.FlightNum = f.FlightNum AND f.AirlineName = %s AND p.purchaseTime BETWEEN DATE_SUB(NOW(), INTERVAL 30 DAY) AND NOW()'
+		# second query sum of calculated price of all tickets that the airline has sold within last year
+		query2 = 'SELECT SUM(calculatedPrice) FROM ticket as t, purchase as p, flight as f WHERE t.ticketID = p.TicketID AND t.FlightNum = f.FlightNum AND f.AirlineName = %s AND p.purchaseTime BETWEEN DATE_SUB(NOW(), INTERVAL 1 YEAR) AND NOW()'
 		cursor.execute(query, (airlineName))
 		data = cursor.fetchall()
+		cursor.execute(query2, (airlineName))
+		data2 = cursor.fetchall()
 		cursor.close()
-		return render_template('staffHome.html', username=username, revenue=data)
+		return render_template('staffHome.html', username=username, monthly=data, yearly=data2)
 	except: 
 		return render_template('staffHome.html', username=username, message="No revenue to show/Other error?")
 

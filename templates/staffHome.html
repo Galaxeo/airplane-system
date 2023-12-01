@@ -12,10 +12,8 @@
     6. View flight ratings (done, make sure to check for more populated ratings)
     7. Schedule maintenance (done)
     8. View frequent customer (done)
-    9. View earned revenue (almost done, have to include last month as well as last year)
+    9. View earned revenue (done)
     10. Logout (done)
-    Additionally: enforce that only staff can do these actions
-    Mostly have to add checks for dates
 -->
 
 <body>
@@ -150,10 +148,16 @@
     <form action="/staffShowFrequent" method="POST">
         <input type="submit" value='See Most Frequent Customer' />
     </form>
-    {% if revenue %}
-    {% for line in revenue %}
-    <h3>Total Earned Revenue</h3>
-    <p>{{line['SUM(calculatedPrice)']}}</p>
+    {% if monthly %}
+    {% for line in monthly %}
+    <h3>Monthly Earned Revenue:</h3>
+    <p>${{line['SUM(calculatedPrice)']}}</p>
+    {% endfor %}
+    {% endif %}
+    {% if yearly %}
+    {% for line in yearly %}
+    <h3>Yearly Earned Revenue:</h3>
+    <p>${{line['SUM(calculatedPrice)']}}</p>
     {% endfor %}
     {% endif %}
     <form action="/staffShowRevenue" method="POST">

@@ -6,11 +6,11 @@
 <!-- # In order to add flights to the userHome, have to run an sql query that finds all flights that the user has a ticket to (sql select [idk select all info from flight] from flight as f, ticket as t, purhcase as p, customer as c, where c.email = p.email and p.ticketID = t.TicketId, t.flightNum = f.flightnum -->
 
 <!-- Use cases:
-    1. View my flights (almost done, default to showing future flights)
-    2. Search for flights (almost done, don't show flights that already went)
-    3. Purchase ticket (almost done, need to make sure flight is not already done)
+    1. View my flights (done)
+    2. Search for flights (done)
+    3. Purchase ticket (done)
     4. Cancel trip (done)
-    5. Give ratings (done, maybe consider restricting 1 rating per flight)
+    5. Give ratings (done)
     6. Track spending (done)
     7. Logout (done)
 -->
@@ -37,10 +37,9 @@
     <table>
         <th>Flight Number</th>
         <th>Airline Name</th>
-        <th>Ticket ID</th>
         <th>Departure Time</th>
-        <th>Arrival Time</th>
         <th>Departure Airport</th>
+        <th>Arrival Time</th>
         <th>Arrival Airport</th>
         <th>Status</th>
         <th>Cancel Trip</th>
@@ -49,10 +48,9 @@
         <tr>
             <td>{{line['FlightNum']}}</td>
             <td>{{line['AirlineName']}}</td>
-            <td>{{line['TicketID']}}</td>
             <td>{{line['DepartureTime']}}</td>
-            <td>{{line['ArrivalTime']}}</td>
             <td>{{line['DepartureAirport']}}</td>
+            <td>{{line['ArrivalTime']}}</td>
             <td>{{line['ArrivalAirport']}}</td>
             <td>{{line['Status']}}</td>
             <td>
@@ -69,8 +67,6 @@
     <form action="/userSearchFlights" method="POST">
         <label for="departureAirport">Departure Airport:</label>
         <input type="text" id="departureAirport" name="departureAirport" placeholder="Departure Airport Code" /> <br>
-        <label for="city">City:</label>
-        <input type="text" id="city" name="city" placeholder="City" /> <br>
         <label for="arrivalAirport">Arrival Airport:</label>
         <input type="text" id="arrivalAirport" name="arrivalAirport" placeholder="Arrival Airport Code" /> <br>
         <label for="departureTime">Departure Time:</label>
@@ -85,14 +81,18 @@
         <th>Flight Number</th>
         <th>Airline Name</th>
         <th>Departure Time</th>
+        <th>Departure Airport</th>
         <th>ArrivalTime</th>
+        <th>Arrival Airport</th>
 
         {% for line in searched%}
         <tr>
             <td>{{line['FlightNum']}}</td>
             <td>{{line['AirlineName']}}</td>
             <td>{{line['DepartureTime']}}</td>
+            <td>{{line['DepartureAirport']}}</td>
             <td>{{line['ArrivalTime']}}</td>
+            <td>{{line['ArrivalAirport']}}</td>
         </tr>
         {% endfor %}
     </table>
