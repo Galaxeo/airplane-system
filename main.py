@@ -254,8 +254,16 @@ def userTotalSpending():
 	firstName = session['firstName']
 	dateFrom = request.form['dateFrom']
 	dateTo = request.form['dateTo']
+	# If dateFrom and dateTo are empty, default to querying sum of all tickest that the user has purchased in the last 6 months
+	if dateFrom == '' and dateTo == '':
+		query = 'SELECT SUM(calculatedPrice) FROM ticket as t, purchase as p WHERE t.ticketID = p.TicketID AND p.email = %s AND p.purchaseTime BETWEEN DATE_SUB(NOW(), INTERVAL 6 MONTH) AND NOW()'
+		cursor = conn.cursor();
+		cursor.execute(query, (email))
+		data = cursor.fetchall()
+		return render_template('userHome.html', email=email, firstName=firstName, spending=data)
 	# Query calculating sum of price of all tickets that the user has purchased between the given dates
-	query = 'SELECT SUM(calculatedPrice) FROM ticket as t, purchase as p WHERE t.ticketID = p.TicketID AND p.email = %s AND p.purchaseTime BETWEEN %s AND %s'
+	else: 
+		query = 'SELECT SUM(calculatedPrice) FROM ticket as t, purchase as p WHERE t.ticketID = p.TicketID AND p.email = %s AND p.purchaseTime BETWEEN %s AND %s'
 	cursor = conn.cursor();
 	cursor.execute(query, (email, dateFrom, dateTo))
 	data = cursor.fetchall()
