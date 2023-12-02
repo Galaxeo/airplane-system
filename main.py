@@ -14,6 +14,12 @@ conn = pymysql.connect(host='localhost',
                        charset='utf8mb4',
                        cursorclass=pymysql.cursors.DictCursor)
 
+def checkStaff():
+	if 'userType' in session:
+		if session['userType'] == 'staff':
+			return True
+	return False
+
 #Define a route to hello function
 @app.route('/')
 def hello():
@@ -93,8 +99,8 @@ def userLoginAuth():
 	error = None
 	if(data):
 		session['email'] = email
-		print(data)
 		session['firstName'] = data['FirstName']
+		session['userType'] = 'user'
 		return redirect(url_for('userHome'))
 	else:
 		error = "Invalid login or username"
@@ -304,6 +310,7 @@ def staffLoginAuth():
 	if(data):
 		session['username'] = username
 		session['airlineName'] = data['AirlineName']
+		session['userType'] = 'staff'
 		return redirect(url_for('staffHome'))
 	else:
 		error = "Invalid login or username"
@@ -311,11 +318,15 @@ def staffLoginAuth():
 
 @app.route('/staffHome')
 def staffHome():
+	if not checkStaff():
+		return redirect('badLogin.html')
 	username = session['username']
 	return render_template('staffHome.html', username=username)
 @app.route('/staffShowFlights', methods=['GET', 'POST'])
 # Show flights
 def staffShowFlights():
+	if not checkStaff():
+		return redirect('badLogin.html')
 	username = session['username']
 	airlineName = session['airlineName']
 	startDate = request.form['startDate']
@@ -360,6 +371,8 @@ def staffShowFlights():
 @app.route('/staffAddFlight', methods=['GET', 'POST'])
 # Add flight
 def staffAddFlight():
+	if not checkStaff():
+		return redirect('badLogin.html')
 	username = session['username']
 	airlineName = session['airlineName']
 	flightNum = request.form['flightNum']
@@ -382,6 +395,8 @@ def staffAddFlight():
 # View customers of a flight
 @app.route('/staffViewCustomers', methods=['GET', 'POST'])
 def staffViewCustomers():
+	if not checkStaff():
+		return redirect('badLogin.html')
 	username = session['username']
 	airlineName = session['airlineName']
 	flightNum = request.form['flightNum']
@@ -396,6 +411,8 @@ def staffViewCustomers():
 # Change status of flight
 @app.route('/staffChangeStatus', methods=['GET', 'POST'])
 def staffChangeStatus():
+	if not checkStaff():
+		return redirect('badLogin.html')
 	username = session['username']
 	airlineName = session['airlineName']
 	flightNum = request.form['flightNum']
@@ -409,6 +426,8 @@ def staffChangeStatus():
 # Add airplane
 @app.route('/staffAddAirplane', methods=['GET', 'POST'])
 def staffAddAirplane():
+	if not checkStaff():
+		return redirect('badLogin.html')
 	username = session['username']
 	airlineName = session['airlineName']
 	planeID = request.form['planeID']
@@ -426,6 +445,8 @@ def staffAddAirplane():
 # Add airport
 @app.route('/staffAddAirport', methods=['GET', 'POST'])
 def staffAddAirport():
+	if not checkStaff():
+		return redirect('badLogin.html')
 	username = session['username']
 	airlineName = session['airlineName']
 	airportCode = request.form['airportCode']
@@ -446,6 +467,8 @@ def staffAddAirport():
 # Show all ratings
 @app.route('/staffShowRatings', methods=['GET', 'POST'])
 def staffShowRatings():
+	if not checkStaff():
+		return redirect('badLogin.html')
 	username = session['username']
 	airlineName = session['airlineName']
 	cursor = conn.cursor();
@@ -457,6 +480,8 @@ def staffShowRatings():
 # Schedule maintenance
 @app.route('/staffScheduleMaintenance', methods=['GET', 'POST'])
 def staffScheduleMaintenance():
+	if not checkStaff():
+		return redirect('badLogin.html')
 	username = session['username']
 	maintenanceID = request.form['maintenanceID']
 	planeID = request.form['planeID']
@@ -474,6 +499,8 @@ def staffScheduleMaintenance():
 # Show the most frequent customer (most tickets bought)
 @app.route('/staffShowFrequent', methods=['GET', 'POST'])
 def staffShowFrequentCustomer():
+	if not checkStaff():
+		return redirect('badLogin.html')
 	username = session['username']
 	airlineName = session['airlineName']
 	cursor = conn.cursor();
@@ -491,6 +518,8 @@ def staffShowFrequentCustomer():
 # TODO: Add date range and default last 30 days
 @app.route('/staffShowRevenue', methods=['GET', 'POST'])
 def staffShowRevenue():
+	if not checkStaff():
+		return redirect('badLogin.html')
 	username = session['username']
 	airlineName = session['airlineName']
 	try:
@@ -507,60 +536,6 @@ def staffShowRevenue():
 		return render_template('staffHome.html', username=username, monthly=data, yearly=data2)
 	except: 
 		return render_template('staffHome.html', username=username, message="No revenue to show/Other error?")
-
-#Authenticates the login
-@app.route('/loginAuth', methods=['GET', 'POST'])
-def loginAuth():
-	#grabs information from the forms
-	username = request.form['username']
-	password = request.form['password']
-
-	#cursor used to send queries
-	cursor = conn.cursor()
-	#executes query
-	query = 'SELECT * FROM user WHERE username = %s and password = %s'
-	cursor.execute(query, (username, password))
-	#stores the results in a variable
-	data = cursor.fetchone()
-	#use fetchall() if you are expecting more than 1 data row
-	cursor.close()
-	error = None
-	if(data):
-		#creates a session for the the user
-		#session is a built in
-		session['username'] = username
-		return redirect(url_for('home'))
-	else:
-		#returns an error message to the html page
-		error = 'Invalid login or username'
-		return render_template('login.html', error=error)
-
-#Authenticates the register
-@app.route('/registerAuth', methods=['GET', 'POST'])
-def registerAuth():
-	#grabs information from the forms
-	username = request.form['username']
-	password = request.form['password']
-
-	#cursor used to send queries
-	cursor = conn.cursor()
-	#executes query
-	query = 'SELECT * FROM user WHERE username = %s'
-	cursor.execute(query, (username))
-	#stores the results in a variable
-	data = cursor.fetchone()
-	#use fetchall() if you are expecting more than 1 data row
-	error = None
-	if(data):
-		#If the previous query returns data, then user exists
-		error = "This user already exists"
-		return render_template('register.html', error = error)
-	else:
-		ins = 'INSERT INTO user VALUES(%s, %s)'
-		cursor.execute(ins, (username, password))
-		conn.commit()
-		cursor.close()
-		return render_template('index.html')
 
 @app.route('/showFlights', methods=['GET', 'POST'])
 def showFlights():
@@ -599,12 +574,15 @@ def post():
 @app.route('/logout')
 def logout():
 	session.pop('username')
+	session.pop('userType')
+	session.pop('airlineName')
 	return redirect('/')
 		
 @app.route('/userLogout')
 def userLogout():
 	session.pop('email')
 	session.pop('firstName')
+	session.pop('userType')
 	return redirect('/')
 app.secret_key = 'some key that you will never guess'
 #Run the app on localhost port 5000
