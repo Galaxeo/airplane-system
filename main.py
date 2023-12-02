@@ -150,10 +150,10 @@ def userSearchFlights():
 		query += ' AND arrivalAirport = %s'
 		params.append(arrivalAirport)
 	if departureTime:
-		query += ' AND departureTime = %s'
+		query += ' AND DATE(departureTime) = %s'
 		params.append(departureTime)
 	if arrivalTime:
-		query += ' AND arrivalTime = %s'
+		query += ' AND DATE(arrivalTime) = %s'
 		params.append(arrivalTime)
 	cursor.execute(query, params)
 
