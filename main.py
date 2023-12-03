@@ -10,7 +10,7 @@ app = Flask(__name__)
 conn = pymysql.connect(host='localhost',
                        user='root',
                        password='',
-                       db='airport_system',
+                       db='airplane_system',
                        charset='utf8mb4',
                        cursorclass=pymysql.cursors.DictCursor)
 
@@ -365,7 +365,8 @@ def staffShowFlights():
 		params.append(arrivalAirport)
 
 	# If none of these fields are provided, show flights for the next 30 days
-	query += ' AND DepartureTime BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 30 DAY)'
+	if not startDate and not endDate and not departureAirport and not arrivalAirport:
+		query += ' AND DepartureTime BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 30 DAY)'
 	# Add the ORDER BY clause
 	query += ' ORDER BY DepartureTime'
 
@@ -460,13 +461,13 @@ def staffAddAirport():
 	airportCode = request.form['airportCode']
 	airportName = request.form['airportName']
 	airportCity = request.form['airportCity']
-	airportState = request.form['airportState']
+	airportCountry= request.form['airportCountry']
 	numTerminals = request.form['numTerminals']
 	type = request.form['type']
 	try:
 		cursor = conn.cursor()
 		ins = 'INSERT INTO airport VALUES(%s, %s, %s, %s, %s, %s)'
-		cursor.execute(ins, (airportCode, airportName, airportCity, airportState, numTerminals, type))
+		cursor.execute(ins, (airportCode, airportName, airportCity, airportCountry, numTerminals, type))
 		conn.commit()
 		cursor.close()
 		return render_template('staffHome.html', username=username, message="Airport added successfully")

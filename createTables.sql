@@ -110,8 +110,8 @@ CREATE TABLE Rating (
     Comment varchar(255),
     TicketID varchar(255),
     FOREIGN KEY (Email) REFERENCES `Customer`(Email),
-    FOREIGN KEY (FlightNum) REFERENCES `Flight`(FlightNum)
-    FOREIGN KEY (TicketID) REFERENCES `Ticket`(TicketID
+    FOREIGN KEY (FlightNum) REFERENCES `Flight`(FlightNum),
+    FOREIGN KEY (TicketID) REFERENCES `Ticket`(TicketID)
 );
 CREATE TABLE Departures AS
     SELECT f.AirlineName, a.AirportCode, f.FlightNum, f.DepartureTime
