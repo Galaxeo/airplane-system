@@ -20,6 +20,31 @@ def checkStaff():
 			return True
 	return False
 
+def giveUserPermissions():
+	# if userType == 'staff': give all permissions
+	# if userType == 'user': give only user permissions
+	if session['userType'] == 'staff':
+		query = 'GRANT ALL PRIVILEGES ON airplane_system TO cheok@localhost'
+		cursor = conn.cursor()
+		cursor.execute(query)
+		conn.commit()
+		cursor.close()
+	elif session['userType'] == 'user':
+		# give select permissions overall, give delete permissions on purchase table, insert permissions on rating table. insert permissions on purchase table
+		queries = ['GRANT SELECT ON airplane_system.* TO cheok@localhost', 'GRANT DELETE ON airplane_system.purchase TO cheok@localhost', 'GRANT INSERT ON airplane_system.rating TO cheok@localhost', 'GRANT INSERT ON airplane_system.purchase TO cheok@localhost']
+		for query in queries:
+			cursor = conn.cursor()
+			cursor.execute (query)
+			conn.commit()
+			cursor.close()
+	elif session['userType'] == 'user':
+		# give select permissions overall, give delete permissions on purchase table, insert permissions on rating table. insert permissions on purchase table
+		cursor = conn.cursor()
+		cursor.execute (query)
+		conn.commit()
+		cursor.close()
+		return
+
 #Define a route to hello function
 @app.route('/')
 def hello():
@@ -101,6 +126,7 @@ def userLoginAuth():
 		session['email'] = email
 		session['firstName'] = data['FirstName']
 		session['userType'] = 'user'
+		giveUserPermissions();
 		return redirect(url_for('userHome'))
 	else:
 		error = "Invalid login or username"
@@ -319,6 +345,7 @@ def staffLoginAuth():
 		session['username'] = username
 		session['airlineName'] = data['AirlineName']
 		session['userType'] = 'staff'
+		giveUserPermissions();
 		return redirect(url_for('staffHome'))
 	else:
 		error = "Invalid login or username"
