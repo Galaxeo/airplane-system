@@ -24,14 +24,16 @@ def giveUserPermissions():
 	# if userType == 'staff': give all permissions
 	# if userType == 'user': give only user permissions
 	if session['userType'] == 'staff':
-		query = 'GRANT ALL PRIVILEGES ON airplane_system TO cheok@localhost'
+		query = 'GRANT ALL PRIVILEGES ON airplane_system TO user@localhost'
 		cursor = conn.cursor()
 		cursor.execute(query)
 		conn.commit()
 		cursor.close()
 	elif session['userType'] == 'user':
 		# give select permissions overall, give delete permissions on purchase table, insert permissions on rating table. insert permissions on purchase table
-		queries = ['GRANT SELECT ON airplane_system.* TO cheok@localhost', 'GRANT DELETE ON airplane_system.purchase TO cheok@localhost', 'GRANT INSERT ON airplane_system.rating TO cheok@localhost', 'GRANT INSERT ON airplane_system.purchase TO cheok@localhost']
+		queries = ['GRANT SELECT ON airplane_system.* TO user@localhost', 'GRANT DELETE ON airplane_system.purchase TO user@localhost', 'GRANT INSERT ON airplane_system.rating TO user@localhost', 'GRANT INSERT ON airplane_system.purchase TO user@localhost', ]
+		# queries to revoke permissions to the table airlinestaff
+		query = 'REVOKE ALL PRIVILEGES ON airplane_system.airlinestaff FROM cheok@localhost'
 		for query in queries:
 			cursor = conn.cursor()
 			cursor.execute (query)
